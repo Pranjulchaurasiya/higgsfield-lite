@@ -1,11 +1,12 @@
 """Synthetic collector checks; fixtures never enter the submission's session logs."""
 
 import json
+import io
 from pathlib import Path
 import tempfile
 import unittest
 
-from agent_capture import capture, importable_messages
+from agent_capture import capture, importable_messages, read_hook_input
 
 
 class CaptureTests(unittest.TestCase):
@@ -89,6 +90,10 @@ class CaptureTests(unittest.TestCase):
         path = self.send("UserPromptSubmit", prompt="original")
         self.send("Stop", turn_id="resumed", model="next-model", last_assistant_message="finished")
         self.assertIn("[LOG_ENTRY type=RESPONSE num=1", path.read_text())
+
+    def test_hook_stdin_is_utf8_independent_of_windows_codepage(self):
+        raw = json.dumps({"prompt": "CAPTURE TEST — नमस्ते"}, ensure_ascii=False).encode("utf-8")
+        self.assertEqual(read_hook_input(io.BytesIO(raw))["prompt"], "CAPTURE TEST — नमस्ते")
 
 
 if __name__ == "__main__":

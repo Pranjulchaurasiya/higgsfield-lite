@@ -17,6 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "capture.config.json"
 
 
+def read_hook_input(stream):
+    # Codex sends UTF-8 JSON even when Windows Python defaults stdin to cp1252.
+    return json.loads(stream.read().decode("utf-8"))
+
+
 def utc_now():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
@@ -187,7 +192,7 @@ def capture(event, root=ROOT, config=None, recover=False):
         records = read_records(event.get("transcript_path"))
         meta = next((r["payload"] for r in records if r.get("type") == "session_meta"), {})
         state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {
-            "session_id": session, "tool": meta.get("originator", "codex"), "entries": [],
+            "session_id": session, "tool": "codex-cli" if meta.get("source") == "cli" else "codex-desktop", "entries": [],
         }
         if recover:
             for message in importable_messages(records):
@@ -231,14 +236,26 @@ def capture(event, root=ROOT, config=None, recover=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--import-rollout", type=Path)
+    parser.add_argument("--follow-rollout", type=Path, help="One-time setup recovery; exits once an outstanding response is captured")
     args = parser.parse_args()
-    if args.import_rollout:
-        records = read_records(args.import_rollout)
+    rollout = args.import_rollout or args.follow_rollout
+    if rollout:
+        records = read_records(rollout)
         meta = next(r["payload"] for r in records if r.get("type") == "session_meta")
-        result = capture({"session_id": meta["id"], "cwd": meta["cwd"], "transcript_path": str(args.import_rollout)}, recover=True)
-        print(result or "Already captured")
+        event = {"session_id": meta["id"], "cwd": meta["cwd"], "transcript_path": str(rollout)}
+        deadline = time.monotonic() + 12 * 60 * 60
+        while True:
+            result = capture(event, recover=True)
+            if not args.follow_rollout:
+                print(result or "Already captured")
+                break
+            if any(m["kind"] == "RESPONSE" for m in importable_messages(read_records(rollout))):
+                break
+            if time.monotonic() > deadline:
+                raise TimeoutError("Setup turn did not finish within twelve hours")
+            time.sleep(2)
     else:
-        event = json.load(sys.stdin)
+        event = read_hook_input(sys.stdin.buffer)
         capture(event)
         print("{}")  # Stop expects JSON; never return continuation instructions.
 

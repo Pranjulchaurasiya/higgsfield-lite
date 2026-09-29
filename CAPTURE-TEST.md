@@ -14,6 +14,7 @@ Codex lifecycle command hooks receive the current event as JSON on stdin. The re
 Relevant changed files and directories:
 
 - `.codex/hooks.json` — registers `UserPromptSubmit` and `Stop` command hooks.
+- `.gitignore` — keeps `.agent-logs/` itself tracked while excluding only collector state and temporary files.
 - `capture.config.json` — capture author and project metadata.
 - `scripts/capture-hooks.json` — portable hook definition used during setup.
 - `scripts/agent_capture.py` — collector, session journal, locking, deduplication, and safe rendering logic.
