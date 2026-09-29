@@ -192,7 +192,7 @@ def capture(event, root=ROOT, config=None, recover=False):
         records = read_records(event.get("transcript_path"))
         meta = next((r["payload"] for r in records if r.get("type") == "session_meta"), {})
         state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {
-            "session_id": session, "tool": "codex-cli" if meta.get("source") == "cli" else "codex-desktop", "entries": [],
+            "session_id": session, "tool": "codex-cli" if meta.get("source") in ("cli", "exec") else "codex-desktop", "entries": [],
         }
         if recover:
             for message in importable_messages(records):
