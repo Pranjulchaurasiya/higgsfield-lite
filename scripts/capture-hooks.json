@@ -1,0 +1,31 @@
+{
+  "description": "8x assignment: automatically capture verbatim prompts and final responses locally.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/agent_capture.py",
+            "commandWindows": "python \"C:\\Users\\pranj\\Documents\\Higgsfield AI - Clone\\scripts\\agent_capture.py\"",
+            "timeout": 10,
+            "statusMessage": "Recording assignment prompt"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/agent_capture.py",
+            "commandWindows": "python \"C:\\Users\\pranj\\Documents\\Higgsfield AI - Clone\\scripts\\agent_capture.py\"",
+            "timeout": 10,
+            "statusMessage": "Recording assignment final response"
+          }
+        ]
+      }
+    ]
+  }
+}
