@@ -1,0 +1,16 @@
+[2026-09-29 03:46 IST] MILESTONE | Started append-only session log.
+  Why: User requested a root log for material decisions, scope changes, bugs, approach changes, and milestones.
+  Rejected: Retrospective entries with unverified timestamps. Files: LOG.txt
+[2026-09-29 19:27 IST] DECISION | Locked Next.js App Router, TypeScript, Tailwind, Replicate FLUX Schnell polling, Supabase Postgres/Storage, and Vercel.
+  Why: One concrete image-generation stack with durable job/media storage; Vercel function files are temporary/read-only outside `/tmp`.
+  Rejected: SQLite for deployed job state and multiple providers. Files: TECH_SPEC.md, AGENTS.md, DECISIONS.md, LOG.txt
+[2026-09-29 19:27 IST] SCOPE | Replaced vague PRD acceptance language with five observable generation, recovery, persistence, and sample-label checks.
+  Why: Reviewers need concrete pass/fail behavior for the core flow.
+  Rejected: “Can be demonstrated without dead ends” because it is not directly testable. Files: PRD.md, DECISIONS.md, LOG.txt
+[2026-09-29 19:31 IST] FIX | Removed resolved stack items from pending decisions and documented provider-to-app status mapping plus the one-shot MOCK failure/retry path.
+  Why: Keep the planning docs consistent and make the required failure check reproducible.
+  Rejected: Leaving stale TBDs after locking the stack. Files: DECISIONS.md, PRD.md, TECH_SPEC.md, README.md, LOG.txt
+[2026-09-29 23:10 IST] SCOPE | Aligned product scope to candidate-provided brief: original visual identity, seeded demo user, image workflow, credit ledger/refund, asset actions; cut video, Explore, studio, payments, and coming-soon features.
+  Why: The full brief resolves earlier provisional scope and prioritizes a focused 4-hour submission. Rejected: broad Higgsfield feature recreation. Files: PRD.md, AGENTS.md, DECISIONS.md, README.md, LOG.txt
+[2026-09-29 23:10 IST] DECISION | Set demo wallet to 10 internal credits, one per image; record reserve/refund transactions and treat asset reuse as prompt/settings restoration, not image conditioning.
+  Why: The locked FLUX Schnell model is text-to-image; this keeps costs transparent and refund behavior auditable without adding payments. Rejected: implying unsupported reference-image conditioning. Files: TECH_SPEC.md, PRD.md, DECISIONS.md, README.md, LOG.txt
