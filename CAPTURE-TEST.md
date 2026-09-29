@@ -136,3 +136,82 @@ python scripts/verify_capture.py 'C:\Users\pranj\.codex\sessions\2026\09\29\roll
 ```
 
 The source transcripts and deduplication journal are local-only; the public evidence is the committed Markdown logs and raw canaries above. New clones need Python, an adjusted hook command path, and a fresh `/hooks` trust review. This setup needs no API key or added environment variable. Do not put secrets into prompts: capture is verbatim and is intended for a public submission.
+
+---
+
+## Antigravity
+
+### Tool and model
+
+- Tool: Antigravity IDE on Windows.
+- Model: Gemini 3.8 Flash (Medium) (`gemini-3.8-flash` in hook event payload).
+- Planning/execution: the same configured model handles both planning and execution.
+
+### Mechanism and configuration
+
+- Mechanism: `.agents/hooks.json` registers `PreInvocation` and `Stop` lifecycle hooks.
+- Adapter: `scripts/antigravity_capture.py` (with `.agents/capture_adapter.py` fallback launcher) wraps `scripts/agent_capture.py`.
+- Transcript source: Antigravity writes conversation records to `transcript.jsonl` and `transcript_full.jsonl` under `<appDataDir>\brain\<conversation-id>\.system_generated\logs\`. The adapter reads `transcript_full.jsonl` when available to guarantee untruncated content.
+- Log location: `.agent-logs/<YYYY-MM-DD_HH-MM-SS>_<conversationId>.md`. Reuses the exact same format, header schema, UTF-8 decoding, and per-session append-only Markdown logs as Codex.
+- Extraction rules:
+  - Prompts: Extracted from `USER_INPUT` records; only the inner text of `<USER_REQUEST>` is preserved; IDE-injected metadata blocks (`<ADDITIONAL_METADATA>`, `<USER_SETTINGS_CHANGE>`) and system turns are excluded.
+  - Responses: Extracted from the turn's final `PLANNER_RESPONSE` step (`status: "DONE"`); model `thinking`, intermediate tool calls, and tool execution outputs are strictly excluded.
+  - Deduplication: Because `PreInvocation` fires before every model call (including multiple times per turn across tool steps), the adapter keys entries by `turn-{N}:PROMPT` and SHA-256 digest, recording each prompt exactly once.
+
+### Things that failed or required adaptation
+
+1. **Payload schema difference**: Unlike Codex's `UserPromptSubmit` which passes `prompt` text in the hook stdin payload, Antigravity's `PreInvocation` and `Stop` hooks pass execution metadata (`conversationId`, `workspacePaths`, `transcriptPath`, `modelName`). Prompt and response text had to be extracted directly from the transcript logs.
+2. **Repeated `PreInvocation` firings**: In Antigravity, `PreInvocation` fires on every turn step before calling the model. If a turn involves multiple tool calls, `PreInvocation` fires multiple times. An in-memory and state-level deduplication check was implemented to ensure prompt entries are only written once.
+3. **IDE-injected tags in `USER_INPUT`**: Prompts submitted via the Antigravity IDE UI are wrapped in `<USER_REQUEST>` tags and appended with `<ADDITIONAL_METADATA>` and `<USER_SETTINGS_CHANGE>`. A regex extractor was required to capture only the user's verbatim input.
+4. **Token-saving transcript truncation**: `transcript.jsonl` can truncate large step contents. The adapter resolves `transcript_full.jsonl` in the same directory to guarantee complete, untruncated verbatim records.
+5. **No automatic hook invocation in IDE GUI**: Lifecycle hooks declared in `.agents/hooks.json` are not invoked by the Antigravity IDE chat interface on Windows. Neither `PreInvocation` nor `Stop` executed automatically during user interaction.
+6. **Agent manual invocation during canary 1**: The first canary prompt was captured via a manual command run by the agent (`python -c "import scripts.antigravity_capture as ac; ..."`) while inspecting transcript locations. At the time of that command, the assistant response had not yet completed, leaving the log with only a `PROMPT` entry and no `RESPONSE`.
+7. **Transition to documented manual export**: Per assignment deadline rules (01:20 IST cutoff), because native hook dispatch does not trigger from the IDE GUI, transcript capture is performed using the standalone CLI adapter: `python scripts/antigravity_capture.py --session <conversationId>`, preserving verbatim prompt and final response records without fabricating automation.
+
+### Canaries
+
+#### Canary 1 (Manual Export During Hook Investigation)
+
+- Session ID: `d34558f1-15b4-40e0-b0bf-bbd2f537343d`
+- File: `.agent-logs/2026-09-29_18-58-38_d34558f1-15b4-40e0-b0bf-bbd2f537343d.md`
+- Captured: Prompt captured manually during agent inspection; response appended upon turn completion via `scripts/antigravity_capture.py`.
+
+##### Raw Canary 1 Entries
+
+```text
+[LOG_ENTRY type=PROMPT num=1 session=d34558f1]
+timestamp: 2026-09-29T18:58:38.014Z
+model: gemini-3.8-flash
+
+CAPTURE TEST - antigravity, Pranjul
+
+
+[LOG_ENTRY type=RESPONSE num=1 session=d34558f1]
+timestamp: 2026-09-29T20:02:44.962Z
+model: gemini-3.8-flash
+
+Acknowledged — Antigravity capture canary 1 received.
+
+### Status
+
+- **Session 1 ID**: `d34558f1-15b4-40e0-b0bf-bbd2f537343d`
+- **Model**: `gemini-3.8-flash`
+- **Prompt Captured**:
+  ```text
+  [LOG_ENTRY type=PROMPT num=1 session=d34558f1]
+  timestamp: 2026-09-29T18:58:38.014Z
+  model: gemini-3.8-flash
+
+  CAPTURE TEST - antigravity, Pranjul
+  ```
+- **Log Destination**: [.agent-logs/2026-09-29_18-58-38_d34558f1-15b4-40e0-b0bf-bbd2f537343d.md](file:///c:/Users/pranj/Documents/Higgsfield%20AI%20-%20Clone/.agent-logs/2026-09-29_18-58-38_d34558f1-15b4-40e0-b0bf-bbd2f537343d.md)
+- **Adapter Update**: [scripts/antigravity_capture.py](file:///c:/Users/pranj/Documents/Higgsfield%20AI%20-%20Clone/scripts/antigravity_capture.py) and [.agents/hooks.json](file:///c:/Users/pranj/Documents/Higgsfield%20AI%20-%20Clone/.agents/hooks.json) hardened with automatic brain transcript resolution across IDE session paths and direct in-process command execution. All 13 collector unit tests pass.
+
+### Next Step
+
+Please open a **second independent Antigravity session** and submit the second canary prompt:
+```text
+CAPTURE TEST - antigravity, Pranjul
+```
+```
+

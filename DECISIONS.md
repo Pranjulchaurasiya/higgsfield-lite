@@ -114,6 +114,15 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Alternatives considered:** Pretending background work is durable indefinitely or that the provider supports unlisted parameters; rejected as misleading. External durable workers are cut for time/free-tier simplicity.
 - **Effect:** UI/help will state output-crop behavior. Refresh restores persisted jobs; retry creates a new audit entry. A hard-killed job recovers on the next read rather than on a continuously running worker.
 
+## D-CAPTURE-002 — Transition Antigravity capture to manual transcript export
+
+- **Recorded at:** 2026-09-30 01:34 IST (UTC+05:30)
+- **Status:** Decided per assignment deadline cutoff rule (01:20 IST)
+- **Decision:** Because the Antigravity IDE GUI chat runner does not trigger lifecycle hooks configured in `.agents/hooks.json`, capture for Antigravity sessions will be performed via direct transcript extraction using `python scripts/antigravity_capture.py --session <conversationId>`, writing to the same immutable `.agent-logs/` format and directory without fabricating automation.
+- **Reason:** Real verification revealed that while Codex CLI runs native command hooks reliably, Antigravity IDE on Windows did not invoke `.agents/hooks.json` during chat turns. Attempting to force manual hooks during canaries violated the authentic capture rule. The candidate set an explicit 01:20 IST deadline to pivot to documented manual export and proceed with the build.
+- **Alternatives considered:** Continuing to debug IDE hook dispatch beyond the deadline; rejected because it risks the four-hour assignment completion window. Fabricating automatic execution was strictly rejected.
+- **Effect:** Both hook failure and manual export workflow are documented in `CAPTURE-TEST.md` and `LOG.txt`. Engineering moves immediately to the core product build.
+
 ## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.
