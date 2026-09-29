@@ -18,6 +18,7 @@ This repository is being prepared for an 8x Software Engineer practical assignme
 - Record material decisions, scope changes, bugs, fixes, approach changes, and milestones in the append-only root `LOG.txt` using its required format. Skip small chatter and questions. Do not rewrite prior entries.
 - Maintain `DECISIONS.md` for durable product and architecture decisions; do not use it as a conversation transcript.
 - Update `README.md` when setup, features, integrations, or limitations materially change.
+- Keep automatic prompt/final capture enabled using `.codex/hooks.json`; see `CAPTURE-TEST.md` for the two-session gate and real failure history. Never manually fabricate or repair a captured entry. Commit `.agent-logs/` alongside the code it produced; private deduplication state stays ignored.
 
 ## Commands
 
@@ -30,7 +31,7 @@ These commands are the expected scaffold scripts; they become runnable after `pa
 ## Layout
 
 - `app/` — App Router pages and API routes
-- `lib/` — generation jobs, Replicate client, Supabase access, and credit rules
+- `lib/` — generation jobs, Cloudflare Workers AI client, Supabase access, and credit rules
 - `components/` — reusable interface components
 
 ## Before calling work complete

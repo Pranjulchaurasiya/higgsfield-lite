@@ -20,10 +20,10 @@ A seeded demo creator using the app without authentication. There are no payment
 
 ## Requirements and scope
 
-- Use Replicate `black-forest-labs/flux-schnell` for live image generation and polling; persist jobs and assets in Supabase.
+- Use Cloudflare Workers AI `@cf/black-forest-labs/flux-1-schnell` via synchronous REST in a server background task; poll our persisted Supabase job status. Free tiers only.
 - Make the per-generation demo-credit cost visible before submit. Reserve one demo credit when a job is accepted; refund it automatically on failure. Show a ledger entry for every credit transaction.
-- Provide a visible one-shot `MOCK` failure control for reviewers; the simulated failure must be clearly identified and exercise the same refund/retry UX.
-- Asset library supports download, delete, and reuse of prompt/settings. FLUX Schnell is text-to-image; “reuse” does not send image pixels as model conditioning.
+- Provide a visible one-shot `SAMPLE` / `MOCK` failure control for reviewers; the simulated failure must be clearly identified and exercise the same refund/retry UX.
+- Asset library supports download, delete, and **Remix** of prompt/settings. FLUX Schnell is text-to-image; Remix does not send image pixels as model conditioning. Three aspect options are clearly described as output crops because Cloudflare's documented model schema does not expose native dimensions.
 - Label all fixtures or sample media with a visible `SAMPLE` badge. Live output must not be mislabeled.
 - Keep all provider and Supabase service credentials server-side.
 - Cut: video, Explore, marketing studio, payments, and “coming soon” features.

@@ -86,7 +86,35 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Effect:** Document the limitation in the interface/help text and preserve a useful one-click continuation workflow.
 - **Revisit if:** The candidate authorizes changing the selected model.
 
-## Pending decisions
+## D-CAPTURE-001 — Use native Codex hooks for the public assignment record
+
+- **Recorded at:** 2026-09-29 23:57 IST (UTC+05:30)
+- **Status:** Installed and verified with two independent sessions
+- **Decision:** Capture normal user prompts and final responses using repository-local `UserPromptSubmit` and `Stop` command hooks. Preserve entry bodies and failed attempts, track public logs with code, and keep only collector state private. Decode hook input explicitly as UTF-8.
+- **Reason:** The candidate's capture brief requires automatic, verbatim, cross-session evidence before product implementation. Native hooks provide full text and the actual per-event model.
+- **Alternatives considered:** Manual summaries or reconstructed responses are incompatible with the brief. A permanent transcript watcher is unnecessary; a temporary source-based recovery collector covers only the already-running setup turn.
+- **Effect:** `CAPTURE-TEST.md` records actual successful canaries and failed encoding attempts. New installations require hook path adjustment and trust review. Product scope remains unchanged.
+- **Revisit if:** The Codex hook event format changes or a new capture tool is introduced.
+
+## D-009 — Replace Replicate with free-tier Cloudflare inference
+
+- **Recorded at:** 2026-09-29 23:58 IST (UTC+05:30)
+- **Status:** Decided by candidate; supersedes provider/pricing parts of D-004 and D-007
+- **Decision:** Use Cloudflare Workers AI `@cf/black-forest-labs/flux-1-schnell` REST at four steps, Supabase persistence, and Vercel Hobby; no paid services. Run one minimal live preflight before scaffolding and stop if it fails.
+- **Reason:** Candidate explicitly changed the integration and requires a free-tier demonstration within about three hours.
+- **Alternatives considered:** Replicate, provider switching, and paid queues; outside the requested scope.
+- **Effect:** Our job states and polling replace provider prediction polling. One demo credit per image remains; remove Replicate dollar estimates. Shared free daily allowance can reject requests and must trigger refunds.
+
+## D-010 — Bound background execution and expose honest crop/Remix limits
+
+- **Recorded at:** 2026-09-29 23:58 IST (UTC+05:30)
+- **Status:** Implementation direction based on official API documentation
+- **Decision:** Use Next.js `after()` with a 60-second route budget, 40-second provider deadline, atomic claim/cancel transitions, and persisted lease recovery. Fail/refund expired processing jobs on later API access. Offer three output crops with dimensions at most 1024; call prompt/settings restoration Remix.
+- **Reason:** `after()` does not survive the platform's hard timeout. Cloudflare's documented Schnell input supports prompt and steps, not width/height or reference images.
+- **Alternatives considered:** Pretending background work is durable indefinitely or that the provider supports unlisted parameters; rejected as misleading. External durable workers are cut for time/free-tier simplicity.
+- **Effect:** UI/help will state output-crop behavior. Refresh restores persisted jobs; retry creates a new audit entry. A hard-killed job recovers on the next read rather than on a continuously running worker.
+
+## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.
 - Implementation details may be adjusted based on real integration behavior, with material changes logged here and in `LOG.txt`.
