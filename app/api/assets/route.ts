@@ -45,15 +45,26 @@ const SAMPLE_FIXTURES = [
   },
 ];
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export async function GET() {
   const globalJobStore = globalThis as unknown as {
     _mockAssets?: Map<string, StoredAsset>;
   };
-  const mockAssetsMap = globalJobStore._mockAssets || new Map();
+  const mockAssetsMap = isDev ? (globalJobStore._mockAssets || new Map()) : new Map();
   const memoryItems = Array.from(mockAssetsMap.values()).map((a) => ({
     ...a,
     url: a.data_url || a.storage_object_key,
   }));
+
+  const dedupeAssets = (list: StoredAsset[]): StoredAsset[] => {
+    const seen = new Set<string>();
+    return list.filter((item) => {
+      if (!item?.id || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
 
   try {
     const { data: assets, error } = await supabase
@@ -62,18 +73,24 @@ export async function GET() {
       .eq('user_id', DEMO_USER_ID)
       .order('created_at', { ascending: false });
 
-    const dedupeAssets = (list: StoredAsset[]): StoredAsset[] => {
-      const seen = new Set<string>();
-      return list.filter((item) => {
-        if (!item?.id || seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      });
-    };
-
-    if (error || !assets || assets.length === 0) {
-      // Fallback: Combine active session memory creations + PRD sample fixtures
+    if (error) {
+      console.error(
+        `[Supabase Error] GET /api/assets failed: ${error.message} (code: ${error.code || 'NONE'})`
+      );
+      if (!isDev) {
+        return NextResponse.json(
+          { success: false, error: `Database error fetching assets: ${error.message}` },
+          { status: 500 }
+        );
+      }
       const combined = dedupeAssets([...memoryItems, ...SAMPLE_FIXTURES]);
+      return NextResponse.json({ success: true, assets: combined });
+    }
+
+    if (!assets || assets.length === 0) {
+      const combined = isDev
+        ? dedupeAssets([...memoryItems, ...SAMPLE_FIXTURES])
+        : dedupeAssets([...SAMPLE_FIXTURES]);
       return NextResponse.json({ success: true, assets: combined });
     }
 
@@ -83,9 +100,15 @@ export async function GET() {
         if (asset.storage_object_key.startsWith('http')) {
           return { ...asset, url: asset.storage_object_key };
         }
-        const { data } = await supabase.storage
+        const { data, error: signErr } = await supabase.storage
           .from('generated-images')
           .createSignedUrl(asset.storage_object_key, 3600);
+
+        if (signErr) {
+          console.error(
+            `[Supabase Error] createSignedUrl failed for asset ${asset.id}: ${signErr.message}`
+          );
+        }
         return {
           ...asset,
           url: data?.signedUrl || `/api/assets/${asset.id}/download`,
@@ -93,15 +116,20 @@ export async function GET() {
       })
     );
 
-    const combined = dedupeAssets([...memoryItems, ...items, ...SAMPLE_FIXTURES]);
+    const combined = isDev
+      ? dedupeAssets([...memoryItems, ...items, ...SAMPLE_FIXTURES])
+      : dedupeAssets([...items, ...SAMPLE_FIXTURES]);
     return NextResponse.json({ success: true, assets: combined });
-  } catch {
-    const seen = new Set<string>();
-    const combined = [...memoryItems, ...SAMPLE_FIXTURES].filter((item) => {
-      if (!item?.id || seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
-    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`[Supabase Error] GET /api/assets exception: ${err.message}`);
+    if (!isDev) {
+      return NextResponse.json(
+        { success: false, error: `Database error fetching assets: ${err.message}` },
+        { status: 500 }
+      );
+    }
+    const combined = dedupeAssets([...memoryItems, ...SAMPLE_FIXTURES]);
     return NextResponse.json({ success: true, assets: combined });
   }
 }

@@ -132,6 +132,20 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Alternatives considered:** Dark mode default or purple AI aesthetic (rejected per brief); blocking on manual Supabase SQL paste before allowing local reviewer exploration (rejected to ensure immediate reviewer testability).
 - **Effect:** Both live Cloudflare generations and MOCK failure paths work seamlessly out-of-the-box. Contact sheet grid presents sample fixtures (`SAMPLE`) and user creations with prompt caption strips, aspect ratios, and Remix parameters.
 
+## D-012 — Resolve Supabase persistence failures and gate in-memory fallback to dev-only
+
+- **Recorded at:** 2026-09-30 12:55 IST (UTC+05:30)
+- **Status:** Decided & implemented
+- **Decision:** Diagnosed why Supabase writes failed and resolved all root causes:
+  1. **Storage Bucket**: Created missing private storage bucket `generated-images` and added bucket creation retry logic.
+  2. **Row Level Security (RLS)**: Added comprehensive `INSERT`, `UPDATE`, and `DELETE` policies to `supabase/migration.sql` so client requests are not rejected with code `42501`.
+  3. **Referential Integrity Ordering**: Adjusted `createGenerationJob` to insert the generation job into `generation_jobs` *before* inserting into `credit_transactions`, satisfying the `job_id REFERENCES generation_jobs(id)` foreign key constraint.
+  4. **Strict Error Logging**: Configured all database operations to log explicit error messages and codes (`[Supabase Error]`) to the dev terminal without printing tokens, secrets, or keys.
+  5. **Environment-Gated In-Memory Fallback**: Made in-memory fallbacks strictly dev-only (`process.env.NODE_ENV !== 'production'`). In production environments, Supabase database failures return visible HTTP 500 error responses (`{ success: false, error: ... }`) instead of silently masking database issues with transient memory structures.
+- **Reason:** The brief and user instructions require durable database persistence in production and honest, visible failure reporting when database connections fail, rather than silently masquerading failures with in-memory stores.
+- **Alternatives considered:** Keeping silent in-memory fallback in production (rejected as masking infrastructure failures); omitting RLS mutation policies (rejected as blocking anon key writes).
+- **Effect:** Real generations, credit reservations, and refunds persist durably to Supabase tables (`demo_users`, `generation_jobs`, `credit_transactions`, `assets`) and Storage. Production environments reliably surface database errors.
+
 ## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.

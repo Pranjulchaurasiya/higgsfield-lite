@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase, DEMO_USER_ID } from '@/lib/supabase';
 import type { StoredAsset } from '@/lib/jobs';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -12,7 +14,7 @@ export async function DELETE(
     const globalJobStore = globalThis as unknown as {
       _mockAssets?: Map<string, StoredAsset>;
     };
-    if (globalJobStore._mockAssets?.has(id)) {
+    if (isDev && globalJobStore._mockAssets?.has(id)) {
       globalJobStore._mockAssets.delete(id);
       return NextResponse.json({ success: true, message: 'Asset deleted' });
     }
@@ -25,14 +27,36 @@ export async function DELETE(
       .eq('user_id', DEMO_USER_ID)
       .single();
 
-    if (fetchErr || !asset) {
-      // If it's a sample fixture, acknowledge gracefully
+    if (fetchErr) {
+      if (fetchErr.code !== 'PGRST116') {
+        console.error(
+          `[Supabase Error] DELETE /api/assets/[id] fetch failed: ${fetchErr.message} (code: ${fetchErr.code || 'NONE'})`
+        );
+        if (!isDev) {
+          return NextResponse.json(
+            { success: false, error: `Database error fetching asset: ${fetchErr.message}` },
+            { status: 500 }
+          );
+        }
+      }
+      // If it's a sample fixture or not found, acknowledge gracefully
+      return NextResponse.json({ success: true, message: 'Asset removed from active view' });
+    }
+
+    if (!asset) {
       return NextResponse.json({ success: true, message: 'Asset removed from active view' });
     }
 
     // Delete storage object if stored in bucket
     if (!asset.storage_object_key.startsWith('http')) {
-      await supabase.storage.from('generated-images').remove([asset.storage_object_key]);
+      const { error: removeErr } = await supabase.storage
+        .from('generated-images')
+        .remove([asset.storage_object_key]);
+      if (removeErr) {
+        console.error(
+          `[Supabase Error] Storage remove failed for ${asset.storage_object_key}: ${removeErr.message}`
+        );
+      }
     }
 
     // Delete asset row
@@ -43,12 +67,19 @@ export async function DELETE(
       .eq('user_id', DEMO_USER_ID);
 
     if (delErr) {
-      return NextResponse.json({ success: false, error: delErr.message }, { status: 500 });
+      console.error(
+        `[Supabase Error] DELETE /api/assets/[id] delete failed: ${delErr.message} (code: ${delErr.code || 'NONE'})`
+      );
+      return NextResponse.json(
+        { success: false, error: `Database error deleting asset: ${delErr.message}` },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, message: 'Asset deleted' });
   } catch (error: unknown) {
     const err = error as Error;
+    console.error(`[Supabase Error] DELETE /api/assets/[id] exception: ${err.message}`);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
