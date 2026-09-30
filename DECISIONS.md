@@ -146,6 +146,15 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Alternatives considered:** Keeping silent in-memory fallback in production (rejected as masking infrastructure failures); omitting RLS mutation policies (rejected as blocking anon key writes).
 - **Effect:** Real generations, credit reservations, and refunds persist durably to Supabase tables (`demo_users`, `generation_jobs`, `credit_transactions`, `assets`) and Storage. Production environments reliably surface database errors.
 
+## D-013 — Enforce default-deny RLS for client roles (server-only database access)
+
+- **Recorded at:** 2026-09-30 13:15 IST (UTC+05:30)
+- **Status:** Decided & implemented
+- **Decision:** Removed all public/anon `INSERT`, `UPDATE`, `DELETE`, and `SELECT` policies from `supabase/migration.sql`. RLS remains enabled on all tables (`demo_users`, `generation_jobs`, `credit_transactions`, `assets`) and the `generated-images` storage bucket, leaving a strict default-deny policy in place for direct browser/client access (`anon` and `authenticated` roles).
+- **Reason:** The browser client only accesses application state through Next.js server API routes (`/api/generations`, `/api/credits`, `/api/assets`), which use the service role key (`SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_ROLE_KEY`). The service role key bypasses RLS in Postgres. Allowing direct client mutations or reads is unnecessary and creates security exposure.
+- **Alternatives considered:** Permitting client SELECT policies (rejected as unnecessary since all reads are mediated by server API routes); permitting client mutation policies (rejected per user security guidance).
+- **Effect:** Client access directly against the Supabase REST/Storage endpoints is denied. Server API routes operate with full administrative control.
+
 ## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.

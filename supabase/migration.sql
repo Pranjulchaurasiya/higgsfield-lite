@@ -81,44 +81,32 @@ ALTER TABLE generation_jobs
   ADD CONSTRAINT fk_resulting_asset FOREIGN KEY (resulting_asset_id) REFERENCES assets(id) ON DELETE SET NULL;
 
 -- 5. Row Level Security (RLS)
+-- Enforce strict server-only access.
+-- The Next.js server uses the SUPABASE_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY
+-- which bypasses RLS in Postgres. By enabling RLS without granting policies
+-- to anon or authenticated, direct client/browser access is completely blocked (default deny).
 ALTER TABLE demo_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE generation_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credit_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 
--- Allow read, insert, and update so both service-role and anon clients can operate
+-- Clean up any prior public/anon policies
 DROP POLICY IF EXISTS "Public read demo_users" ON demo_users;
-CREATE POLICY "Public read demo_users" ON demo_users FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public update demo_users" ON demo_users;
-CREATE POLICY "Public update demo_users" ON demo_users FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Public read generation_jobs" ON generation_jobs;
-CREATE POLICY "Public read generation_jobs" ON generation_jobs FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public insert generation_jobs" ON generation_jobs;
-CREATE POLICY "Public insert generation_jobs" ON generation_jobs FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS "Public update generation_jobs" ON generation_jobs;
-CREATE POLICY "Public update generation_jobs" ON generation_jobs FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Public read credit_transactions" ON credit_transactions;
-CREATE POLICY "Public read credit_transactions" ON credit_transactions FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public insert credit_transactions" ON credit_transactions;
-CREATE POLICY "Public insert credit_transactions" ON credit_transactions FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Public read assets" ON assets;
-CREATE POLICY "Public read assets" ON assets FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public insert assets" ON assets;
-CREATE POLICY "Public insert assets" ON assets FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS "Public delete assets" ON assets;
-CREATE POLICY "Public delete assets" ON assets FOR DELETE USING (true);
 
 -- 6. Storage Bucket for Generated Images
+-- Private bucket: only server via service role / signed URLs can access objects
 INSERT INTO storage.buckets (id, name, public) VALUES ('generated-images', 'generated-images', false) ON CONFLICT (id) DO NOTHING;
 
 DROP POLICY IF EXISTS "Allow select on generated-images" ON storage.objects;
-CREATE POLICY "Allow select on generated-images" ON storage.objects FOR SELECT USING (bucket_id = 'generated-images');
-
 DROP POLICY IF EXISTS "Allow insert on generated-images" ON storage.objects;
-CREATE POLICY "Allow insert on generated-images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'generated-images');
-
 DROP POLICY IF EXISTS "Allow delete on generated-images" ON storage.objects;
-CREATE POLICY "Allow delete on generated-images" ON storage.objects FOR DELETE USING (bucket_id = 'generated-images');
+
