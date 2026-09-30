@@ -69,13 +69,13 @@ export function LedgerDrawer({ isOpen, onClose, balance, transactions }: LedgerD
               </div>
             ) : (
               <div className="space-y-3">
-                {transactions.map((tx) => {
+                {transactions.map((tx, index) => {
                   const isRefund = tx.transaction_type === 'refund';
                   const isReserve = tx.transaction_type === 'reserve';
 
                   return (
                     <div
-                      key={tx.id}
+                      key={`${tx.id}-${index}`}
                       className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3.5 text-xs transition-colors hover:border-[var(--accent-border)]"
                     >
                       <div className="flex items-center justify-between">

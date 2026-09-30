@@ -83,9 +83,9 @@ export function AssetsGrid({ assets, onRemix, onDeleteAsset, isLoading }: Assets
         <span className="font-mono text-xs text-[var(--text-muted)]">Contact Sheet Grid</span>
       </div>
 
-      {/* Responsive Contact Sheet Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {assets.map((asset) => {
+      {/* Responsive Contact Sheet Grid with items-start to keep natural card height */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        {assets.map((asset, index) => {
           const aspectClass =
             asset.aspect_ratio === '9:16'
               ? 'aspect-[9/16]'
@@ -97,17 +97,18 @@ export function AssetsGrid({ assets, onRemix, onDeleteAsset, isLoading }: Assets
 
           return (
             <div
-              key={asset.id}
+              key={`${asset.id}-${index}`}
               className="group flex flex-col rounded-xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-xs hover:border-[var(--accent-border)] transition-all hover:shadow-md"
             >
               {/* Media Frame */}
               <div className={`relative w-full ${aspectClass} bg-[var(--surface-muted)] overflow-hidden`}>
                 <Image
                   src={imageUrl}
-                  alt={asset.prompt}
+                  alt={asset.is_sample ? 'Sample image, not generated' : asset.prompt}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-103"
+                  priority={index === 0}
                   unoptimized
                 />
 
@@ -125,10 +126,17 @@ export function AssetsGrid({ assets, onRemix, onDeleteAsset, isLoading }: Assets
               </div>
 
               {/* Caption Strip */}
-              <div className="flex-1 p-3.5 flex flex-col justify-between border-t border-[var(--border)] bg-[var(--surface)] text-xs space-y-3">
+              <div className="p-3.5 flex flex-col justify-between border-t border-[var(--border)] bg-[var(--surface)] text-xs space-y-3">
                 <div className="space-y-1.5">
-                  <p className="line-clamp-2 text-[var(--text-primary)] font-normal leading-relaxed" title={asset.prompt}>
-                    &ldquo;{asset.prompt}&rdquo;
+                  <p
+                    className="line-clamp-2 text-[var(--text-primary)] font-normal leading-relaxed"
+                    title={asset.is_sample ? 'Sample image, not generated' : asset.prompt}
+                  >
+                    {asset.is_sample ? (
+                      <span className="italic text-[var(--text-secondary)]">Sample image, not generated</span>
+                    ) : (
+                      <>&ldquo;{asset.prompt}&rdquo;</>
+                    )}
                   </p>
                   <div className="flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
                     <span>{new Date(asset.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
@@ -138,16 +146,20 @@ export function AssetsGrid({ assets, onRemix, onDeleteAsset, isLoading }: Assets
 
                 {/* Actions Row */}
                 <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
-                  {/* Remix (Restore settings) */}
-                  <button
-                    type="button"
-                    onClick={() => onRemix(asset.prompt, asset.aspect_ratio)}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] rounded-md px-3 py-1.5 text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent-light)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                    title="Remix: restore prompt and aspect ratio to Studio"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Remix</span>
-                  </button>
+                  {/* Remix (Restore settings) - only for user-generated creations */}
+                  {!asset.is_sample ? (
+                    <button
+                      type="button"
+                      onClick={() => onRemix(asset.prompt, asset.aspect_ratio)}
+                      className="inline-flex items-center gap-1.5 min-h-[38px] rounded-md px-3 py-1.5 text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent-light)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      title="Remix: restore prompt and aspect ratio to Studio"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>Remix</span>
+                    </button>
+                  ) : (
+                    <div />
+                  )}
 
                   <div className="flex items-center gap-1">
                     {/* Download */}

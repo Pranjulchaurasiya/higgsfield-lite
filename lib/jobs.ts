@@ -28,10 +28,25 @@ export interface GenerationJob {
   } | null;
 }
 
+export interface StoredAsset {
+  id: string;
+  job_id: string | null;
+  user_id: string;
+  storage_object_key: string;
+  prompt: string;
+  aspect_ratio: string;
+  width: number;
+  height: number;
+  is_sample: boolean;
+  data_url?: string;
+  url?: string;
+  created_at: string;
+}
+
 // Global in-memory fallback store when Supabase tables are unmigrated
 const globalJobStore = globalThis as unknown as {
   _mockJobs?: Map<string, GenerationJob>;
-  _mockAssets?: Map<string, any>;
+  _mockAssets?: Map<string, StoredAsset>;
 };
 
 if (!globalJobStore._mockJobs) {

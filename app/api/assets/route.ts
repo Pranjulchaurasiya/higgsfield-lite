@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, DEMO_USER_ID } from '@/lib/supabase';
+import type { StoredAsset } from '@/lib/jobs';
 
 // Fixture sample assets for rich gallery exploration (labeled SAMPLE per PRD)
 const SAMPLE_FIXTURES = [
@@ -8,7 +9,7 @@ const SAMPLE_FIXTURES = [
     job_id: 'sample-job-01',
     user_id: DEMO_USER_ID,
     storage_object_key: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1024&q=80',
-    prompt: 'Warm terracotta ceramic vessels in natural diffused daylight, editorial still life, architectural composition',
+    prompt: 'Sample image, not generated',
     aspect_ratio: '1:1',
     width: 1024,
     height: 1024,
@@ -21,7 +22,7 @@ const SAMPLE_FIXTURES = [
     job_id: 'sample-job-02',
     user_id: DEMO_USER_ID,
     storage_object_key: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=576&q=80',
-    prompt: 'Brutalist concrete courtyard with warm earth-toned shadows and wild pampas grass, portrait 9:16',
+    prompt: 'Sample image, not generated',
     aspect_ratio: '9:16',
     width: 576,
     height: 1024,
@@ -34,7 +35,7 @@ const SAMPLE_FIXTURES = [
     job_id: 'sample-job-03',
     user_id: DEMO_USER_ID,
     storage_object_key: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1024&q=80',
-    prompt: 'Minimalist ochre plaster interior, raw timber dining table, sweeping panoramic daylight, 16:9',
+    prompt: 'Sample image, not generated',
     aspect_ratio: '16:9',
     width: 1024,
     height: 576,
@@ -46,7 +47,7 @@ const SAMPLE_FIXTURES = [
 
 export async function GET() {
   const globalJobStore = globalThis as unknown as {
-    _mockAssets?: Map<string, any>;
+    _mockAssets?: Map<string, StoredAsset>;
   };
   const mockAssetsMap = globalJobStore._mockAssets || new Map();
   const memoryItems = Array.from(mockAssetsMap.values()).map((a) => ({
@@ -61,9 +62,18 @@ export async function GET() {
       .eq('user_id', DEMO_USER_ID)
       .order('created_at', { ascending: false });
 
+    const dedupeAssets = (list: StoredAsset[]): StoredAsset[] => {
+      const seen = new Set<string>();
+      return list.filter((item) => {
+        if (!item?.id || seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
+    };
+
     if (error || !assets || assets.length === 0) {
       // Fallback: Combine active session memory creations + PRD sample fixtures
-      const combined = [...memoryItems, ...SAMPLE_FIXTURES];
+      const combined = dedupeAssets([...memoryItems, ...SAMPLE_FIXTURES]);
       return NextResponse.json({ success: true, assets: combined });
     }
 
@@ -83,10 +93,15 @@ export async function GET() {
       })
     );
 
-    const combined = [...memoryItems, ...items, ...SAMPLE_FIXTURES];
+    const combined = dedupeAssets([...memoryItems, ...items, ...SAMPLE_FIXTURES]);
     return NextResponse.json({ success: true, assets: combined });
   } catch {
-    const combined = [...memoryItems, ...SAMPLE_FIXTURES];
+    const seen = new Set<string>();
+    const combined = [...memoryItems, ...SAMPLE_FIXTURES].filter((item) => {
+      if (!item?.id || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
     return NextResponse.json({ success: true, assets: combined });
   }
 }

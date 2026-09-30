@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, DEMO_USER_ID } from '@/lib/supabase';
+import type { StoredAsset } from '@/lib/jobs';
 
 export async function DELETE(
   _req: NextRequest,
@@ -9,7 +10,7 @@ export async function DELETE(
     const { id } = await params;
 
     const globalJobStore = globalThis as unknown as {
-      _mockAssets?: Map<string, any>;
+      _mockAssets?: Map<string, StoredAsset>;
     };
     if (globalJobStore._mockAssets?.has(id)) {
       globalJobStore._mockAssets.delete(id);

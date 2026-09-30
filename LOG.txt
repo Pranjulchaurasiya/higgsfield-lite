@@ -33,4 +33,8 @@
 [2026-09-30 10:40 IST] MILESTONE | Completed design pass and end-to-end product workflow for Higgsfield Lite (Atelier Studio).
   Why: Delivered warm editorial visual identity (#FAF7F2 canvas, #B8502D terracotta accent, Newsreader serif + Plus Jakarta Sans + JetBrains Mono), inline credit cost indicator ('Generate · 1 credit'), 3-step live pipeline tracker (Queued, Processing, Complete), credit ledger drawer with strict idempotent refund entries, contact-sheet asset gallery with prompt captions and aspect ratios, deterministic MOCK failure simulation, Remix parameter restoration, and download tools. Verified with automated test suite and live browser inspection.
   Rejected: Default shadcn/Tailwind templates, purple AI gradients, and 1:1 Higgsfield branding copy. Files: app/, components/, lib/, tests/, LOG.txt, DECISIONS.md
+[2026-09-30 12:42 IST] FIX | Resolved asset card vertical stretch, sample asset captions/Remix gating, and Next.js dev overlay issues.
+  Why: Applied items-start and removed flex-1 on asset cards so cards preserve their natural heights; replaced sample prompt text with 'Sample image, not generated' and hid Remix on samples while keeping the SAMPLE badge; resolved Next.js dev issues overlay warnings/errors by deduplicating asset IDs, ensuring unique React keys, and prioritizing above-the-fold hero images for LCP.
+  Rejected: Full CSS masonry complexity where grid items-start achieves natural card heights; leaving unescaped or duplicate keys in dev overlay. Files: components/AssetsGrid.tsx, components/LedgerDrawer.tsx, app/api/assets/route.ts, app/api/assets/[id]/route.ts, lib/jobs.ts, LOG.txt
+
 
