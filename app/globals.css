@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #FAF7F2;
+  --surface: #FFFFFF;
+  --surface-muted: #F3EFEA;
+  --border: #E6DFD5;
+  --border-subtle: #F0EAE1;
+  --accent: #B8502D;
+  --accent-hover: #9F4122;
+  --accent-light: #FBF0EB;
+  --accent-border: #F1CEC2;
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-muted: #8C857E;
+  --success: #226743;
+  --success-bg: #EDF7F1;
+  --error: #9B2C2C;
+  --error-bg: #FDF2F2;
+  --badge-sample: #92400E;
+  --badge-sample-bg: #FEF3C7;
+  --badge-mock: #831843;
+  --badge-mock-bg: #FCE7F3;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-border: var(--accent-border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --font-serif: var(--font-serif-display), Georgia, Cambria, serif;
+  --font-sans: var(--font-sans-body), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-code), ui-monospace, Menlo, monospace;
+}
+
+/* Subtle editorial paper grain texture */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

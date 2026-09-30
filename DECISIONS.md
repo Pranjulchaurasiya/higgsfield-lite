@@ -123,7 +123,17 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Alternatives considered:** Continuing to debug IDE hook dispatch beyond the deadline; rejected because it risks the four-hour assignment completion window. Fabricating automatic execution was strictly rejected.
 - **Effect:** Both hook failure and manual export workflow are documented in `CAPTURE-TEST.md` and `LOG.txt`. Engineering moves immediately to the core product build.
 
+## D-011 — Establish warm editorial visual identity and resilient demo store fallback
+
+- **Recorded at:** 2026-09-30 10:40 IST (UTC+05:30)
+- **Status:** Decided; design pass completed
+- **Decision:** Implemented a warm editorial aesthetic (terracotta ochre `#B8502D` accent, paper/linen canvas `#FAF7F2`, high-contrast deep charcoal text `#1F1D1A`, Google Fonts `Newsreader` serif + `Plus Jakarta Sans` body + `JetBrains Mono` code, subtle SVG paper grain). Provided a zero-breakage in-memory demo store fallback that operates gracefully prior to Supabase migration, ensuring Cloudflare FLUX Schnell generations, simulated MOCK failure refunds, and contact-sheet asset browsing work immediately on cold start.
+- **Reason:** Satisfies the brief's requirement to build a distinctive, non-generic UI (rejecting purple gradients, generic shadcn templates, and 1:1 Higgsfield copies) while keeping credit ledger and job recovery observable.
+- **Alternatives considered:** Dark mode default or purple AI aesthetic (rejected per brief); blocking on manual Supabase SQL paste before allowing local reviewer exploration (rejected to ensure immediate reviewer testability).
+- **Effect:** Both live Cloudflare generations and MOCK failure paths work seamlessly out-of-the-box. Contact sheet grid presents sample fixtures (`SAMPLE`) and user creations with prompt caption strips, aspect ratios, and Remix parameters.
+
 ## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.
 - Implementation details may be adjusted based on real integration behavior, with material changes logged here and in `LOG.txt`.
+

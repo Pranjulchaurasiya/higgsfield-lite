@@ -9,3 +9,4 @@ node_modules
 __pycache__/
 .agent-logs/.state/
 .agent-logs/*.tmp
+*.tsbuildinfo

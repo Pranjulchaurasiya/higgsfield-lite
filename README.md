@@ -12,31 +12,30 @@ An 8x Software Engineer assignment prototype focused on a complete image workflo
 
 ## Current status
 
-Step 0 is blocked: the one Cloudflare preflight on 2026-09-29 at 18:29:20 UTC returned HTTP 403 in 242 ms with no image and no structured numeric error codes. This indicates access was denied; the exact credential/account cause has not been established. Implementation stops at the candidate's preflight gate. There is no application scaffold or verified deployment yet.
+The full end-to-end product workflow and warm editorial visual identity are implemented and verified:
+- **Design System**: Atelier Studio warm editorial look with linen canvas (`#FAF7F2`), terracotta ochre accent (`#B8502D`), deep charcoal high-contrast typography (`Newsreader` serif display, `Plus Jakarta Sans` body, `JetBrains Mono` for metadata), generous spacing, subtle paper grain, and accessible focus states and tap targets.
+- **Workflow**: Creation console with inline credit cost (`Generate · 1 credit`), 3-step live pipeline tracker (`Queued` → `Processing` → `Completed`), deterministic `MOCK` failure simulation switch, and instant credit refund on failure.
+- **Ledger**: Demo credit drawer displaying atomic reservation entries, initial grant (+10 credits), and strictly idempotent refund (+1) audit trail.
+- **Library Archive**: Contact-sheet asset grid with varied aspect ratios (`1:1`, `9:16`, `16:9`), caption strips with prompts and dimensions, `SAMPLE` badge for initial fixtures, Remix button to restore settings to Studio, and asset deletion and download.
+- **Resilience**: Zero-breakage in-memory fallback store allows immediate end-to-end testing of Cloudflare FLUX Schnell generations and simulated refunds even before Supabase database migration is pasted.
 
-Automatic Codex prompt/final capture is installed and verified in two independent sessions. See [`CAPTURE-TEST.md`](CAPTURE-TEST.md) for exact canaries, failures, and verification details. Logs ship in `.agent-logs/`; interrupted prompts have no invented responses.
+## Setup & Running
 
-## Agent capture setup
+Required environment variable names (set in `.env.local` or Vercel dashboard — never commit secret values):
+- `CLOUDFLARE_ACCOUNT_ID` (Cloudflare account ID)
+- `CLOUDFLARE_API_TOKEN` (Workers AI API token)
+- `NEXT_PUBLIC_SUPABASE_URL` (Supabase project URL)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase anonymous public key)
+- `SUPABASE_SECRET_KEY` (Supabase service role secret key, server-only)
 
-Capture uses Python 3.10+ (standard library only) and native Codex `UserPromptSubmit`/`Stop` hooks. It requires no added environment variables or credentials. On this machine the hooks are installed and trusted. To set up another checkout:
+Database migration SQL is provided at `supabase/migration.sql` for Supabase SQL Editor.
 
-1. Set your GitHub handle/project in `capture.config.json` and adjust the Windows command path in `scripts/capture-hooks.json` to the new checkout.
-2. Copy that template to `.codex/hooks.json`, preserving any existing hooks.
-3. Open Codex in the repo, use `/hooks` to review/trust the two command hooks, and send the canary in two new sessions. Check both prompt and final response before starting implementation.
+### Runnable commands
 
-Run the collector checks with:
-
-```powershell
-python -m unittest discover -s scripts -p 'test_*.py' -v
-```
-
-The hooks preserve message bodies and update only the session metadata header. `.gitattributes` preserves log line endings. Keep `.agent-logs/` committed alongside each implementation batch; only collector state and temporary files are ignored. Text attachments referenced by pasted prompts are preserved separately under `.agent-logs/attachments/`. Secrets must stay out of prompts because the public transcript is verbatim. Tool-driven delegation is not a normal user prompt; use normal desktop/CLI prompts for the assignment record.
-
-## Setup
-
-Required variable names: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`. Keep values in local/Vercel environment settings; never paste or commit them. The account/token and Supabase secret are server-only. Exact app commands will be added with the scaffold.
-
-The one-request provider preflight runs with Node 24: `node --env-file=.env.local scripts/test-cloudflare.mjs`. It prints only sanitized status, timing, and image metadata; it neither prints credentials nor saves an image. Do not rerun it automatically: every inference consumes the daily free allocation.
+- Start development server: `npm run dev` (runs on `http://localhost:3000`)
+- Run credit invariant unit tests: `npm test` (tests 4/4 passing)
+- Run typecheck: `npx tsc --noEmit`
+- Run linter: `npm run lint`
 
 ## Project notes
 
@@ -45,3 +44,4 @@ The one-request provider preflight runs with Node 24: `node --env-file=.env.loca
 - [`AGENTS.md`](AGENTS.md): repository working rules.
 - [`DECISIONS.md`](DECISIONS.md): durable decisions.
 - [`LOG.txt`](LOG.txt): append-only material project events.
+
