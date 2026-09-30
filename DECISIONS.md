@@ -155,6 +155,18 @@ The candidate supplied the full brief on 2026-09-29. It is authoritative over ea
 - **Alternatives considered:** Permitting client SELECT policies (rejected as unnecessary since all reads are mediated by server API routes); permitting client mutation policies (rejected per user security guidance).
 - **Effect:** Client access directly against the Supabase REST/Storage endpoints is denied. Server API routes operate with full administrative control.
 
+## D-014 — Expose native Model Context Protocol (MCP) agent interface, inspection lightbox, and structured web metadata
+
+- **Recorded at:** 2026-09-30 15:40 IST (UTC+05:30)
+- **Status:** Decided & implemented
+- **Decision:** Expanded platform capabilities across three functional areas:
+  1. **Model Context Protocol (MCP) Endpoint (`/api/mcp` and `/mcp`)**: Implemented a standards-compliant JSON-RPC 2.0 server supporting `initialize`, `tools/list`, and `tools/call`. Exposed four discrete tools: `atelier_generate_image`, `atelier_get_credits`, `atelier_list_assets`, and `atelier_get_job_status`. Included a developer modal in the navigation bar with copyable configurations for Cursor (`.cursor/mcp.json`) and Claude Desktop (`claude_desktop_config.json`).
+  2. **Workflow & Inspection Tooling**: Added curated inspiration prompt presets with one-tap auto-fill, randomized prompt selection ("Surprise Me"), completed generation rendering directly inside the studio console, and a full-screen image inspector lightbox with zoom/pan, model/aspect metadata badges, instant prompt copying, direct high-res PNG download, and one-click remix loading.
+  3. **Structured Metadata & Discoverability**: Embedded OpenGraph, Twitter Cards, and Schema.org JSON-LD (`SoftwareApplication`, `FAQPage`) into `app/layout.tsx` to provide rich social card previews and semantic crawler indexing.
+- **Reason:** Generative studios are increasingly consumed programmatically by autonomous agents and developer tooling; providing a first-class MCP server elevates the platform from an isolated browser UI to an agent-callable tool. The inspection lightbox and inspiration presets remove friction during interactive testing and evaluation, while structured metadata ensures compliance with modern web standards.
+- **Alternatives considered:** Restricting the API to proprietary ad-hoc REST endpoints (rejected because MCP provides standardized tool schema discovery for modern AI agents); using heavy external modal/gallery libraries (rejected in favor of lightweight native Tailwind + Lucide implementation to maintain low bundle size and zero external client dependencies).
+- **Effect:** Agents and developers can programmatically trigger FLUX Schnell inference, query credit balances, and inspect job status via standard MCP protocol. The interactive browser experience provides full inspection capabilities without leaving the viewport.
+
 ## Remaining setup
 
 - Exact environment setup and Vercel project linking after the candidate provides project access; do not put secret values in this file.
