@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar';
 import { CreateConsole } from '@/components/CreateConsole';
 import { AssetsGrid, AssetItem } from '@/components/AssetsGrid';
 import { LedgerDrawer } from '@/components/LedgerDrawer';
+import { Background3D } from '@/components/Background3D';
 import type { CreditTransaction } from '@/lib/credits';
 
 export default function StudioPage() {
@@ -90,10 +91,12 @@ export default function StudioPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--canvas)]">
-      <Navbar creditBalance={balance} onOpenLedger={() => setIsLedgerOpen(true)} />
+    <div className="relative min-h-screen flex flex-col bg-[var(--canvas)] overflow-x-hidden">
+      <Background3D />
+      <div className="relative z-10 flex flex-col flex-1">
+        <Navbar creditBalance={balance} onOpenLedger={() => setIsLedgerOpen(true)} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
         {/* Studio Create Section */}
         <section aria-labelledby="studio-heading">
           <CreateConsole
@@ -123,6 +126,7 @@ export default function StudioPage() {
         balance={balance}
         transactions={transactions}
       />
+      </div>
     </div>
   );
 }

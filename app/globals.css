@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #FAF7F2;
-  --surface: #FFFFFF;
-  --surface-muted: #F3EFEA;
-  --border: #E6DFD5;
-  --border-subtle: #F0EAE1;
-  --accent: #B8502D;
-  --accent-hover: #9F4122;
-  --accent-light: #FBF0EB;
-  --accent-border: #F1CEC2;
-  --text-primary: #1C1917;
-  --text-secondary: #57534E;
-  --text-muted: #8C857E;
-  --success: #226743;
-  --success-bg: #EDF7F1;
-  --error: #9B2C2C;
-  --error-bg: #FDF2F2;
-  --badge-sample: #92400E;
-  --badge-sample-bg: #FEF3C7;
-  --badge-mock: #831843;
-  --badge-mock-bg: #FCE7F3;
+  --canvas: #0B0D14;
+  --surface: rgba(18, 22, 33, 0.75);
+  --surface-muted: rgba(26, 32, 48, 0.55);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --accent: #FF5E36;
+  --accent-hover: #FF7754;
+  --accent-light: rgba(255, 94, 54, 0.12);
+  --accent-border: rgba(255, 94, 54, 0.35);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --error: #F43F5E;
+  --error-bg: rgba(244, 63, 94, 0.15);
+  --badge-sample: #FBBF24;
+  --badge-sample-bg: rgba(245, 158, 11, 0.18);
+  --badge-mock: #F472B6;
+  --badge-mock-bg: rgba(244, 114, 182, 0.18);
 }
 
 @theme inline {
@@ -41,7 +41,15 @@
   --font-mono: var(--font-mono-code), ui-monospace, Menlo, monospace;
 }
 
-/* Subtle editorial paper grain texture */
+/* Glassmorphism Card Enhancements */
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+}
+
+/* Subtle digital ambient noise overlay */
 body::before {
   content: "";
   position: fixed;
@@ -51,11 +59,11 @@ body::before {
   height: 100vh;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.025;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Custom scrollbars */
+/* Custom modern scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -64,9 +72,9 @@ body::before {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(255, 255, 255, 0.22);
 }

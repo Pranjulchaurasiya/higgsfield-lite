@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { AssetsGrid, AssetItem } from '@/components/AssetsGrid';
 import { LedgerDrawer } from '@/components/LedgerDrawer';
+import { Background3D } from '@/components/Background3D';
 import type { CreditTransaction } from '@/lib/credits';
 
 export default function LibraryPage() {
@@ -54,8 +55,10 @@ export default function LibraryPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--canvas)]">
-      <Navbar creditBalance={balance} onOpenLedger={() => setIsLedgerOpen(true)} />
+    <div className="relative min-h-screen flex flex-col bg-[var(--canvas)] overflow-x-hidden">
+      <Background3D />
+      <div className="relative z-10 flex flex-col flex-1">
+        <Navbar creditBalance={balance} onOpenLedger={() => setIsLedgerOpen(true)} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
         <div>
@@ -81,6 +84,7 @@ export default function LibraryPage() {
         balance={balance}
         transactions={transactions}
       />
+      </div>
     </div>
   );
 }
